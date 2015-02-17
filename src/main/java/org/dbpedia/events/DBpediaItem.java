@@ -26,7 +26,7 @@ public class DBpediaItem {
     private final List<String> excludeWhenStartsWithList;
     private final List<String> excludeWhenContainsList;
 
-    public final String serverURL = "http://localhost:9999";
+    public final String serverURL = "http://mappings.dbpedia.org";
 
     public DBpediaItem(String language, String titleDecoded, long revision) {
         this.language = language;

@@ -24,10 +24,9 @@ public class Main {
 
     private static final String tweeterDateTimeFormat = "yyyy-MM-dd HH:mm:ss Z";
 
-
     public static void main(String[] args) throws Exception {
 
-        File f = new File("/home/jim/Desktop/tweets.cut.tsv");
+        File f = new File("/Users/magnus/Datasets/dbpedia-events/tweets.cut.tsv");
 
         List<CandidateItem> items = new ArrayList<CandidateItem>();
 
@@ -47,7 +46,7 @@ public class Main {
                 try {
                      wikipediaUrl = new URL(wikipediaUrlStr);
                 } catch (MalformedURLException e) {
-                    // Skip this itteration
+                    // Skip this iteration
                     System.err.println("Cannot parse URL: " + wikipediaUrlStr);
                     continue;
                 }
@@ -176,7 +175,8 @@ public class Main {
     }
 
     public static List<String> getFileListForFolder(final File folder) {
-        List<String> fileList = new ArrayList<>();
+        List<String> fileList = new ArrayList<String>();
+
         for (final File fileEntry : folder.listFiles()) {
             fileList.add(fileEntry.getName());
         }
