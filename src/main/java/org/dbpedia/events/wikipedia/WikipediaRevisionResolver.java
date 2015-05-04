@@ -9,15 +9,13 @@ import java.util.*;
  * Created: 5/30/14 11:50 AM
  */
 
-
-
 public class WikipediaRevisionResolver {
     private final CandidateItem candidate;
     private final List<Revision> revisions;
 
     final int maxRevisionsToFetch = 500;
-    final int minutesAfterCandidate  = 720;
     final int minutesBeforeCandidate = -720;
+    final int minutesAfterCandidate  = 720;
 
     public WikipediaRevisionResolver(CandidateItem candidate) {
         this.candidate = candidate;
@@ -43,11 +41,10 @@ public class WikipediaRevisionResolver {
             return 0;
     }
 
-
     private void initRevisions() {
         // Generate a time after <minutesAfterCandidate> the events was fired
-        Date timeStart  = addMinutes(candidate.getDateTimeFired(),  minutesAfterCandidate);
-        Date timeEnd  = addMinutes(candidate.getDateTimeFired(),  minutesBeforeCandidate);
+        Date timeStart = addMinutes(candidate.getDateTimeFired(), minutesBeforeCandidate);
+        Date timeEnd = addMinutes(candidate.getDateTimeFired(), minutesAfterCandidate);
 
         SimpleDateFormat revisionDateFormatter = new SimpleDateFormat(
                 WikipediaUtils.getWikipediaTimestampFormatURL(), Locale.ENGLISH );

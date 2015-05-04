@@ -1,0 +1,14 @@
+
+## get added P-Os
+find /Users/magnus/Development/dbpedia-events/results/ -type f -name \*EN\*.txt -exec grep "^A " {} \; | grep "<http://dbpedia.org/ontology/\|<http://www.w3.org/1999/02/22-rdf-syntax-ns#\|<http://purl.org/dc/terms/" | cut -f3- -d ' ' | awk '{count[$0]++}END{for(j in count) print count [j]"\t" j}' | sort -n
+
+## get added Ps
+find /Users/magnus/Development/dbpedia-events/results/ -type f -name \*EN\*.txt -exec grep "^A " {} \; | grep "<http://dbpedia.org/ontology/\|<http://www.w3.org/1999/02/22-rdf-syntax-ns#\|<http://purl.org/dc/terms/" | cut -f3 -d ' ' | awk '{count[$0]++}END{for(j in count) print count [j]"\t" j}' | sort -n
+
+## get deleted P-Os
+find /Users/magnus/Development/dbpedia-events/results/ -type f -name \*EN\*.txt -exec grep "^D " {} \; | grep "<http://dbpedia.org/ontology/\|<http://www.w3.org/1999/02/22-rdf-syntax-ns#\|<http://purl.org/dc/terms/" | cut -f3- -d ' ' | awk '{count[$0]++}END{for(j in count) print count [j]"\t" j}' | sort -n
+
+## get deleted Ps
+find /Users/magnus/Development/dbpedia-events/results/ -type f -name \*EN\*.txt -exec grep "^D " {} \; | grep "<http://dbpedia.org/ontology/\|<http://www.w3.org/1999/02/22-rdf-syntax-ns#\|<http://purl.org/dc/terms/" | cut -f3 -d ' ' | awk '{count[$0]++}END{for(j in count) print count [j]"\t" j}' | sort -n
+
+

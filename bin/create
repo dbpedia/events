@@ -1,0 +1,16 @@
+#!/bin/bash
+
+MAIN_CLS="org.dbpedia.events.DBpediaLiveDigest"
+MVN="mvn"
+
+if [ ! -d "target" ]; then
+  echo "First run, compiling code..."
+  ${MVN} -pl -am clean install \
+  -Dmaven.test.skip=true \
+  -Dmaven.javadoc.skip=true \
+  -Dsource.skip=true
+  echo "Compiling finished..."
+fi
+
+${MVN} exec:java -q -Dexec.mainClass="$MAIN_CLS" -Dexec.args="$*"
+#cd - > /dev/null

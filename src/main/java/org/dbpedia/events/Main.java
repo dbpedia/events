@@ -26,7 +26,11 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        File f = new File("/Users/magnus/Datasets/dbpedia-events/tweets.cut.tsv");
+        File f = new File("/Users/magnus/Datasets/dbpedia-events/airplanes.tsv");
+//      File f = new File("/Users/magnus/Datasets/dbpedia-events/tweets.cut.tsv");
+//        File f = new File("/Users/magnus/Datasets/dbpedia-events/google-trends.tsv");
+
+        String folder = "results/test/720mins-before-after";
 
         List<CandidateItem> items = new ArrayList<CandidateItem>();
 
@@ -70,11 +74,14 @@ public class Main {
         } catch (Exception e) {
         }
 
-        List<String> existingFilesList = getFileListForFolder(new File("results"));
+        // need a list of (WP url, date, time) from news list
+
+        File ffolder = new File(folder);
+        if (!ffolder.exists())
+            ffolder.mkdirs();
+        List<String> existingFilesList = getFileListForFolder(ffolder);
 
         for (CandidateItem item : items) {
-
-
             // Timestamp string
             SimpleDateFormat revisionDateFormatter = new SimpleDateFormat(
                     WikipediaUtils.getWikipediaTimestampFormatURL(), Locale.ENGLISH );
@@ -97,26 +104,26 @@ public class Main {
             WikipediaRevisionResolver wrr = new WikipediaRevisionResolver(item);
 
             long revisionAfter = wrr.getRevisionAfter();
-            long revisionBefore   = wrr.getRevisionBefore();
+            long revisionBefore = wrr.getRevisionBefore();
 
             tryAndWait1Sec();
             DBpediaItem itemAfter = new DBpediaItem(item.getLanguage(), item.getTitle(), revisionAfter);
             SortedSet<String> triplesAfterEdits = itemAfter.getTriplesCleaned();
 
             tryAndWait1Sec();
-            DBpediaItem itemBefore   = new DBpediaItem(item.getLanguage(), item.getTitle(), revisionBefore);
+            DBpediaItem itemBefore = new DBpediaItem(item.getLanguage(), item.getTitle(), revisionBefore);
             SortedSet<String> triplesBeforeEdits = itemBefore.getTriplesCleaned();
 
             // added triples
             SortedSet<String> added = new TreeSet();
             for (String current: triplesAfterEdits) {
                 //add if previous does NOT contain current
-                if ( ! triplesBeforeEdits.contains(current))
+                if (! triplesBeforeEdits.contains(current))
                     added.add(current);
             }
 
             // removed triples
-            SortedSet<String> removed= new TreeSet();
+            SortedSet<String> removed = new TreeSet();
             for (String current: triplesBeforeEdits) {
                 //add if After does not contain current
                 if (!triplesAfterEdits.contains(current))
@@ -134,12 +141,8 @@ public class Main {
             // Stats
             int itemsAdded = added.size(), itemsRemoved = removed.size(), itemsUnmodified = unmodified.size();
 
-
-
-
             String title = item.getTitleDecoded().replace("/","_").replace("\\", "_");
-            String filename = "results/" + dateStr + "-" + item.getLanguage().toUpperCase() + "-A" + itemsAdded + "-D" + itemsRemoved + "-U" + itemsUnmodified + "-" + title + ".txt";
-
+            String filename = folder + "/" + dateStr + "-" + item.getLanguage().toUpperCase() + "-A" + itemsAdded + "-D" + itemsRemoved + "-U" + itemsUnmodified + "-" + title + ".txt";
 
             try {
                 File diffFile = new File (filename);
@@ -147,31 +150,28 @@ public class Main {
                     System.out.println("Skipping already existing filename: " + filename);
                     continue;
                 }
+
                 PrintWriter out = new PrintWriter(filename);
-
-                out.println("#ADDED");
+                out.println("# ADDED");
                 for (String triple : added) {
-                    out.println(triple);
+                    out.println("A " + triple);
                 }
-
-                out.println("#REMOVED");
+                out.println("# REMOVED");
                 for (String triple : removed) {
-                    out.println(triple);
+                    out.println("D " + triple);
                 }
-                out.println("#UNMODIFIED");
+                out.println("# UNMODIFIED");
                 for (String triple : unmodified) {
                     out.println(triple);
                 }
-
                 out.close();
+
                 System.out.println("Wrote file: " + filename);
             } catch (Exception e) {
                 System.out.println("Problem writing file: " + filename);
                 e.printStackTrace();
             }
-
         }
-
     }
 
     public static List<String> getFileListForFolder(final File folder) {
@@ -193,6 +193,5 @@ public class Main {
             e.printStackTrace();
         }
     }
-
 
 }

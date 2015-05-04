@@ -33,14 +33,17 @@ public class WikipediaUtils {
         return "yyyyMMddHHmmss";
     }
 
-    /* Date format for timestam XML results */
+    /* Date format for timestamp XML results */
     public static String getWikipediaTimestampFormatXML() {
         return "yyyy-MM-dd'T'HH:mm:ss'Z'";
     }
 
 
     public static List<Revision> getRevisions(String api, String title, String timestampStart, String timestampEnd, int maxRevisions) {
-        String revisionUrl = api + "?action=query&prop=revisions&titles=" + title +  "&rvprop=timestamp|ids&rvstart=" + timestampStart + "&rvend=" + timestampEnd + "&rvlimit=" + maxRevisions + "&format=xml";
+        String revisionUrl = api + "?action=query&prop=revisions&format=xml&rvprop=ids%7Ctimestamp&rvlimit=" + maxRevisions + "&rvstart=" + timestampStart + "&rvend=" + timestampEnd + "&rvdir=newer&titles=" + title;
+
+        System.out.println(revisionUrl);
+
         List<Revision> revisions = new ArrayList<Revision>();
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

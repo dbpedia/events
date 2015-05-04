@@ -61,6 +61,8 @@ public class DBpediaItem {
         try {
             URL website = new URL(getExtractionURL(language, revision));
 
+            System.out.println(website);
+
             URLConnection connection = website.openConnection();
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(
@@ -76,7 +78,6 @@ public class DBpediaItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         return  revisionTriples;
     }

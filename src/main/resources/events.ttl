@@ -1,0 +1,85 @@
+@prefix dbe: <http://events.dbpedia.org/ns/core#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix guo: <http://webr3.org/owl/guo#> .
+
+<http://events.dbpedia.org/ns/core#>
+    a owl:Ontology ;
+
+    <http://purl.org/vocab/vann/preferredNamespacePrefix> "dbe" ;
+    <http://purl.org/vocab/vann/preferredNamespaceUri> "http://events.dbpedia.org/ns/core#" ;
+
+    owl:versionInfo "0.1" ;
+
+    rdfs:label "DBpedia Events Ontology"@en ;
+    dcterms:title "DBpedia Events Ontology"@en ;
+    rdfs:isDefinedBy <http://events.dbpedia.org/ns/core.ttl> ;
+    dcterms:license <http://creativecommons.org/licenses/by/3.0/> ;
+    dcterms:license <http://www.apache.org/licenses/LICENSE-2.0> ;
+    dc:rights "This ontology is licensed under Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0) and CC-BY (http://creativecommons.org/licenses/by/3.0/)"@en ;
+    dc:date "2015-04-24"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    dc:issued "2015-04-24"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    dc:modified "2015-04-24"^^<http://www.w3.org/2001/XMLSchema#date> ;
+    dc:creator "Magnus Knuth"@en ;
+
+    rdfs:comment
+        """The DBpedia Events ontology describes concept used for the creation of the DBpedia Events dataset."""@en ;
+
+    dc:description
+        """The DBpedia Events ontology describes concept used for the creation of the DBpedia Events dataset."""@en ;
+
+    rdfs:seeAlso <http://events.dbpedia.org> .
+
+####################################################################
+## Events
+####################################################################
+
+dbe:Event
+    a owl:Class ;
+    rdfs:label "Event"@en .
+
+dbe:update
+    a owl:ObjectProperty ;
+    rdfs:domain dbe:Event ;
+    rdfs:range guo:UpdateInstruction .
+
+dbe:context
+    a owl:ObjectProperty ;
+    rdfs:domain dbe:Event .
+
+####################################################################
+## DigestTemplates
+####################################################################
+
+dbe:DigestTemplate
+    a owl:Class ;
+    rdfs:label "DigestTemplate"@en .
+
+dbe:queryString
+    a owl:DatatypeProperty ;
+    rdfs:label "queryString"@en ;
+    rdfs:domain dbe:DigestTemplate ;
+    rdfs:range xsd:string .
+
+dbe:contextQueryString
+    a owl:DatatypeProperty ;
+    rdfs:label "contextQueryString"@en ;
+    rdfs:domain dbe:DigestTemplate ;
+    rdfs:range xsd:string .
+
+dbe:descriptionTemplate
+    a owl:DatatypeProperty ;
+    rdfs:label "descriptionTemplate"@en ;
+    rdfs:domain dbe:DigestTemplate ;
+    rdfs:range xsd:string .
+
+dbe:ignore
+    a owl:DatatypeProperty ;
+    rdfs:label "ignore"@en ;
+    rdfs:domain dbe:DigestTemplate ;
+    rdfs:range xsd:boolean .
