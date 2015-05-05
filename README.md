@@ -9,19 +9,18 @@ These queries can be configured as digest templates in digest.ttl, e.g.
 
     dig:DEADPEOPLE a dbe:DigestTemplate ;
         dcterms:identifier "DEADPEOPLE" ;
-        dcterms:description """Finds dead people."""@en ;
+        dcterms:description """Finds people who died within last three weeks."""@en ;
         dbe:queryString """SELECT ?u ?res ?deathdate ?deathplace
             { ?u guo:target_subject ?res ;
                 guo:insert [
                     dbo:deathDate ?deathdate ;
                     dbo:deathPlace ?deathplace ] .
-                FILTER (xsd:date(?deathdate) > "2015-02-09"^^xsd:date)
-            }""" ;
-        dbe:contextQueryString """SELECT ?label
-            { %%res%% rdfs:label ?label . }""" ;
+                FILTER (xsd:date(?deathdate) > NOW()-1814400) }""" ;
+        dbe:contextQueryString """SELECT ?label ?labeldeathplace
+            { %%res%% rdfs:label ?label .
+              %%deathplace%% rdfs:label ?labeldeathplace . }""" ;
         dbe:descriptionTemplate """%%res%% died on %%deathdate%% in %%deathplace%%.""" ;
         .
-
 
 ## Data Access
 
