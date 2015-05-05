@@ -9,6 +9,7 @@ import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RiotException;
 import org.dbpedia.events.model.DigestItem;
@@ -214,10 +215,16 @@ public class DBpediaLiveDigest {
         String label = null;
         QueryExecution qe = null;
         try {
-            // TODO replace all bindings
-            digestItem.getBindings();
+            Map<String, RDFNode> bindings = digestItem.getBindings();
 
-            qe = queryFactory.createQueryExecution(PrefixService.getSparqlPrefixDecl() + queryString.replaceAll("%%res%%", "<" + digestItem.getResource() + ">"));
+            for (String var : bindings.keySet()) {
+                if (queryString.contains("%%" + var + "%%")) {
+                    if (bindings.get(var).isURIResource())
+                        queryString = queryString.replaceAll("%%" + var + "%%", "<" + bindings.get(var).asResource().getURI() + ">");
+                }
+            }
+
+            qe = queryFactory.createQueryExecution(PrefixService.getSparqlPrefixDecl() + queryString);
             ResultSet results = qe.execSelect();
 
             if (results.hasNext()) {
@@ -386,6 +393,8 @@ public class DBpediaLiveDigest {
                     L.warn("Multiple pageranks for " + uri);
                 }
             }
+        } catch(QueryException e) {
+            L.error("Exception while getting Pagerank. ", e);
         } finally {
             if (qe != null) {
                 qe.close();
