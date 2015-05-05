@@ -7,28 +7,27 @@
 
 dig:DEADPEOPLE a dbe:DigestTemplate ;
     dcterms:identifier "DEADPEOPLE" ;
-    dcterms:description """Finds dead people."""@en ;
+    dcterms:description """Finds people who died within last three weeks."""@en ;
     dbe:queryString """SELECT ?u ?res ?deathdate ?deathplace
         { ?u guo:target_subject ?res ;
             guo:insert [
                 dbo:deathDate ?deathdate ;
                 dbo:deathPlace ?deathplace ] .
-            FILTER (xsd:date(?deathdate) > "2015-02-09"^^xsd:date)
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
+            FILTER (xsd:date(?deathdate) > NOW()-1814400) }""" ;
+    dbe:contextQueryString """SELECT ?label ?labeldeathplace
+        { %%res%% rdfs:label ?label .
+          %%deathplace%% rdfs:label ?labeldeathplace . }""" ;
     dbe:descriptionTemplate """%%res%% died on %%deathdate%% in %%deathplace%%.""" ;
     .
 
 dig:RELEASED a dbe:DigestTemplate ;
     dcterms:identifier "RELEASED" ;
-    dcterms:description """Finds released works."""@en ;
+    dcterms:description """Finds works released within last three weeks."""@en ;
     dbe:queryString """SELECT ?u ?res ?releasedate
         { ?u guo:target_subject ?res ;
             guo:insert [
                 dbo:releaseDate ?releasedate ] .
-            FILTER (xsd:date(?releasedate) > "2015-02-09"^^xsd:date)
-        }""" ;
+            FILTER (xsd:date(?releasedate) > NOW()-1814400) }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%% is released on %%releasedate%%.""" ;
@@ -36,13 +35,12 @@ dig:RELEASED a dbe:DigestTemplate ;
 
 dig:INTRODUCED a dbe:DigestTemplate ;
     dcterms:identifier "INTRODUCED" ;
-    dcterms:description """Finds introduced things."""@en ;
+    dcterms:description """Finds things introduced within last three weeks."""@en ;
     dbe:queryString """SELECT ?u ?res ?introductiondate
         { ?u guo:target_subject ?res ;
             guo:insert [
                 dbo:introductionDate ?introductionDate ] .
-            FILTER (xsd:date(?introductionDate) > "2015-02-09"^^xsd:date)
-        }""" ;
+            FILTER (xsd:date(?introductionDate) > NOW()-1814400) }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%% is introduced on %%introductionDate%%.""" ;
@@ -63,8 +61,7 @@ dig:RISINGNUMBERS a dbe:DigestTemplate ;
             FILTER (?p != dbo:wikiPageID)
             FILTER (?p != dbo:wikiPageLength)
             FILTER (?p != dbo:wikiPageOutDegree)
-            FILTER (?p != dbo:wikiPageRevisionID)
-        }""" ;
+            FILTER (?p != dbo:wikiPageRevisionID) }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%%'s %%p%% raised from %%old%% to %%new%%.""" ;
@@ -78,10 +75,11 @@ dig:HEADHUNTED a dbe:DigestTemplate ;
             guo:delete [
                 dbo:team ?oldTeam ] ;
             guo:insert [
-                dbo:team ?newTeam ] .
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
+                dbo:team ?newTeam ] . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labeloldTeam ?labelnewTeam
+        { %%res%% rdfs:label ?label .
+          %%oldTeam%% rdfs:label ?labeloldTeam .
+          %%newTeam%% rdfs:label ?labelnewTeam . }""" ;
     dbe:descriptionTemplate """%%res%% switches from %%oldTeam%% to %%newTeam%%.""" ;
     .
 
@@ -93,11 +91,12 @@ dig:PRESIDENT a dbe:DigestTemplate ;
             guo:delete [
                 dbo:president ?oldPres ] ;
             guo:insert [
-                dbo:president ?newPres ] .
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
+                dbo:president ?newPres ] . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labeloldPres ?labelnewPres
         { %%res%% a dbo:Organization ;
-            rdfs:label ?label . }""" ;
+            rdfs:label ?label .
+          %%oldPres%% rdfs:label ?labeloldPres .
+          %%newPres%% rdfs:label ?labelnewPres . }""" ;
     dbe:descriptionTemplate """%%newPres%% succeeds %%oldPres%% as the president of %%res%%.""" ;
     .
 
@@ -109,15 +108,13 @@ dig:LEADER a dbe:DigestTemplate ;
             guo:delete [
                 dbo:leader ?oldLeader ] ;
             guo:insert [
-                dbo:leader ?newLeader ] .
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
+                dbo:leader ?newLeader ] . }""" ;
 #    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label ?labeloldLeader ?labelnewLeader
-#          %%oldLeader%% rdfs:label ?labeloldLeader .
-#          %%newLeader%% rdfs:label ?labelnewLeader .
-#        }""" ;
+#        { %%res%% rdfs:label ?label . }""" ;
+    dbe:contextQueryString """SELECT ?label
+        { %%res%% rdfs:label ?label ?labeloldLeader ?labelnewLeader
+          %%oldLeader%% rdfs:label ?labeloldLeader .
+          %%newLeader%% rdfs:label ?labelnewLeader . }""" ;
     dbe:descriptionTemplate """%%newLeader%% succeeds %%oldLeader%% as the leader of %%res%%.""" ;
     .
 
@@ -127,8 +124,7 @@ dig:EUROPE2015 a dbe:DigestTemplate ;
     dbe:queryString """SELECT ?u ?res
         { ?u guo:target_subject ?res ;
             guo:insert [
-                dcterms:subject dbc:2015_in_Europe ] .
-        }""" ;
+                dcterms:subject dbc:2015_in_Europe ] . }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:paramQueryString """SELECT ?category
@@ -147,18 +143,17 @@ dig:GRANDPRIX a dbe:DigestTemplate ;
                 dbo:secondDriver ?secondD ;
                 dbo:secondDriverTeam ?secondT ;
                 dbo:thirdDriver ?thirdD ;
-                dbo:thirdDriverTeam ?thirdT ] .
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
-#    dbe:contextQueryString """SELECT ?label ?labelfirstD ?labelfirstT ?labelsecondD ?labelsecondT ?labelthirdD ?labelthirdT
-#        { %%res%% rdfs:label ?label .
-#          %%firstD%% rdfs:label ?labelfirstD .
-#          %%firstT%% rdfs:label ?labelfirstT .
-#          %%secondD%% rdfs:label ?labelsecondD .
-#          %%secondT%% rdfs:label ?labelsecondT .
-#          %%thirdD%% rdfs:label ?labelthirdD .
-#          %%thirdT%% rdfs:label ?labelthirdT . }""" ;
+                dbo:thirdDriverTeam ?thirdT ] . }""" ;
+#    dbe:contextQueryString """SELECT ?label
+#        { %%res%% rdfs:label ?label . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labelfirstD ?labelfirstT ?labelsecondD ?labelsecondT ?labelthirdD ?labelthirdT
+        { %%res%% rdfs:label ?label .
+          %%firstD%% rdfs:label ?labelfirstD .
+          %%firstT%% rdfs:label ?labelfirstT .
+          %%secondD%% rdfs:label ?labelsecondD .
+          %%secondT%% rdfs:label ?labelsecondT .
+          %%thirdD%% rdfs:label ?labelthirdD .
+          %%thirdT%% rdfs:label ?labelthirdT . }""" ;
     dbe:descriptionTemplate """%%firstD (%%firstT%%) wins %%res%%, %%secondD%% (%%secondT%%) got second, %%thirdD%% (%%thirdT%%) third.""" ;
     .
 
@@ -170,15 +165,14 @@ dig:PODIUM a dbe:DigestTemplate ;
             guo:insert [
                 dbo:goldMedalist ?gold ;
                 dbo:silverMedalist ?silver ;
-                dbo:bronzeMedalist ?bronze ]
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
-#    dbe:contextQueryString """SELECT ?label ?labelgold ?labelsilver ?labelbronze
-#        { %%res%% rdfs:label ?label .
-#          %%gold%% rdfs:label ?labelgold .
-#          %%silver%% rdfs:label ?labelsilver .
-#          %%bronze%% rdfs:label ?labelbronze . }""" ;
+                dbo:bronzeMedalist ?bronze ] . }""" ;
+#    dbe:contextQueryString """SELECT ?label
+#        { %%res%% rdfs:label ?label . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labelgold ?labelsilver ?labelbronze
+        { %%res%% rdfs:label ?label .
+          %%gold%% rdfs:label ?labelgold .
+          %%silver%% rdfs:label ?labelsilver .
+          %%bronze%% rdfs:label ?labelbronze . }""" ;
     dbe:descriptionTemplate """Gold for %%gold%%, Silver for %%silver%%, Bronze for %%bronze%% in %%res%%.""" ;
     .
 
@@ -189,8 +183,7 @@ dig:JUSTMARRIED a dbe:DigestTemplate ;
         { ?u guo:target_subject ?res ;
             guo:insert [
                 dbo:spouse ?spouse ] .
-          FILTER NOT EXISTS { ?u guo:insert/dbo:spouse ?spouse2 . FILTER (?spouse != ?spouse2) }
-        }""" ;
+          FILTER NOT EXISTS { ?u guo:insert/dbo:spouse ?spouse2 . FILTER (?spouse != ?spouse2) } }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
 #    dbe:contextQueryString """SELECT ?label
@@ -205,13 +198,12 @@ dig:JUSTDIVORCED a dbe:DigestTemplate ;
     dbe:queryString """SELECT ?u ?res ?spouse
         { ?u guo:target_subject ?res ;
             guo:delete [
-                dbo:spouse ?spouse ] .
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
+                dbo:spouse ?spouse ] . }""" ;
 #    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label .
-#          %%spouse%% rdfs:label ?labelspouse . }""" ;
+#        { %%res%% rdfs:label ?label . }""" ;
+    dbe:contextQueryString """SELECT ?label
+        { %%res%% rdfs:label ?label .
+          %%spouse%% rdfs:label ?labelspouse . }""" ;
     dbe:descriptionTemplate """%%res%% divorced %%spouse%%.""" ;
     .
 
@@ -224,14 +216,25 @@ dig:AIRCRAFTOCCURRENCE a dbe:DigestTemplate ;
                 dbprop:wikiPageUsesTemplate <http://en.dbpedia.org/resource/Template:Infobox_aircraft_occurrence> ;
                 dbprop:origin ?origin ;
                 dbprop:destination ?destination ;
-                dbprop:occurenceType ?type ] .
-        }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
+                dbprop:occurenceType ?type ] . }""" ;
 #    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label .
-#          %%origin%% rdfs:label ?labelorigin .
-#          %%destination%% rdfs:label ?labeldestination . }""" ;
+#        { %%res%% rdfs:label ?label . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labelorigin ?labeldestination
+        { %%res%% rdfs:label ?label .
+          %%origin%% rdfs:label ?labelorigin .
+          %%destination%% rdfs:label ?labeldestination . }""" ;
     dbe:descriptionTemplate """%%type%% with %%res%% from %%origin%% to %%destination%%.""" ;
     .
 
+dig:VOLCANO a dbe:DigestTemplate ;
+    dcterms:identifier "VOLCANO" ;
+    dcterms:description """Volcano eruptions."""@en ;
+    dbe:queryString """SELECT ?u ?res
+        { ?u guo:target_subject ?res ;
+            guo:insert [
+                dbo:eruptionYear ?eruptionYear ] .
+            FILTER (YEAR(?eruptionYear) = YEAR(NOW())) }""" ;
+    dbe:contextQueryString """SELECT ?label
+        { %%res%% rdfs:label ?label . }""" ;
+    dbe:descriptionTemplate """Eruption of %%res%%.""" ;
+    .
