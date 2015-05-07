@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# @(#) A shell script for creating the events dataset of yesterday.
+
+# application metadata
+name="events.sh"
+version="0.1"
+home="https://github.com/dbpedia/events"
+
+# basic application environment
+this=`basename $0`
+thisexec=$0
+command="$1"
+os=`uname -s | tr "[:upper:]" "[:lower:]"`
+
+yesterday=`date -v -1d '+%Y-%m-%d'`
+yesterdayDir=`date -v -1d '+%Y/%m/%d'`
+
+# Download the changesets
+echo "Downloading http://live.dbpedia.org/changesets/${yesterdayDir}/"
+wget --random-wait --mirror -np -e robots=off -c -N -P /home/magnus/Datasets/ http://live.dbpedia.org/changesets/${yesterdayDir}/
+
+# Run the extraction from yesterday-00 until yesterday-23
+MAIN_CLS="org.dbpedia.events.DBpediaLiveDigest"
+MVN="mvn"
+
+if [ ! -d "target" ]; then
+  echo "First run, compiling code..."
+  ${MVN} -pl -am clean install \
+  -Dmaven.test.skip=true \
+  -Dmaven.javadoc.skip=true \
+  -Dsource.skip=true
+  echo "Compiling finished..."
+fi
+
+echo "Running ${MAIN_CLS} ${yesterday}-00 ${yesterday}-23"
+${MVN} exec:java -q -Dexec.mainClass="$MAIN_CLS" -Dexec.args="${yesterday}-00 ${yesterday}-23"
