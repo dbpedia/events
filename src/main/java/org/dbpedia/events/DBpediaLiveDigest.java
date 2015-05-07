@@ -84,11 +84,11 @@ public class DBpediaLiveDigest {
     }
 
     public static void main(String[] args) throws Exception {
-        String start = "2015-05-03-00";
-        String end   = "2015-05-03-23";
+//        String start = "2015-05-03-00";
+//        String end   = "2015-05-03-23";
 
-//        String start = args[0];
-//        String end   = args[1];
+        String start = args[0];
+        String end   = args[1];
 
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd-HH");
         DateTime timeStart = fmt.parseDateTime(start);
@@ -228,6 +228,8 @@ public class DBpediaLiveDigest {
             ResultSet results = qe.execSelect();
 
             if (results.hasNext()) {
+                // TODO add to digestbindings and reuse labels for descriptiontemplate
+
                 return true;
             }
         } finally {

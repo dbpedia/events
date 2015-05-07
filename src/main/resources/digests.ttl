@@ -109,10 +109,8 @@ dig:LEADER a dbe:DigestTemplate ;
                 dbo:leader ?oldLeader ] ;
             guo:insert [
                 dbo:leader ?newLeader ] . }""" ;
-#    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label . }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label ?labeloldLeader ?labelnewLeader
+    dbe:contextQueryString """SELECT ?label ?labeloldLeader ?labelnewLeader
+        { %%res%% rdfs:label ?label .
           %%oldLeader%% rdfs:label ?labeloldLeader .
           %%newLeader%% rdfs:label ?labelnewLeader . }""" ;
     dbe:descriptionTemplate """%%newLeader%% succeeds %%oldLeader%% as the leader of %%res%%.""" ;
@@ -144,8 +142,6 @@ dig:GRANDPRIX a dbe:DigestTemplate ;
                 dbo:secondDriverTeam ?secondT ;
                 dbo:thirdDriver ?thirdD ;
                 dbo:thirdDriverTeam ?thirdT ] . }""" ;
-#    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label . }""" ;
     dbe:contextQueryString """SELECT ?label ?labelfirstD ?labelfirstT ?labelsecondD ?labelsecondT ?labelthirdD ?labelthirdT
         { %%res%% rdfs:label ?label .
           %%firstD%% rdfs:label ?labelfirstD .
@@ -166,8 +162,6 @@ dig:PODIUM a dbe:DigestTemplate ;
                 dbo:goldMedalist ?gold ;
                 dbo:silverMedalist ?silver ;
                 dbo:bronzeMedalist ?bronze ] . }""" ;
-#    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label . }""" ;
     dbe:contextQueryString """SELECT ?label ?labelgold ?labelsilver ?labelbronze
         { %%res%% rdfs:label ?label .
           %%gold%% rdfs:label ?labelgold .
@@ -184,11 +178,9 @@ dig:JUSTMARRIED a dbe:DigestTemplate ;
             guo:insert [
                 dbo:spouse ?spouse ] .
           FILTER NOT EXISTS { ?u guo:insert/dbo:spouse ?spouse2 . FILTER (?spouse != ?spouse2) } }""" ;
-    dbe:contextQueryString """SELECT ?label
-        { %%res%% rdfs:label ?label . }""" ;
-#    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label .
-#          %%spouse%% rdfs:label ?labelspouse . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labelspouse
+        { %%res%% rdfs:label ?label .
+          %%spouse%% rdfs:label ?labelspouse . }""" ;
     dbe:descriptionTemplate """%%res%% married %%spouse%%.""" ;
     .
 
@@ -199,9 +191,7 @@ dig:JUSTDIVORCED a dbe:DigestTemplate ;
         { ?u guo:target_subject ?res ;
             guo:delete [
                 dbo:spouse ?spouse ] . }""" ;
-#    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label . }""" ;
-    dbe:contextQueryString """SELECT ?label
+    dbe:contextQueryString """SELECT ?label ?labelspouse
         { %%res%% rdfs:label ?label .
           %%spouse%% rdfs:label ?labelspouse . }""" ;
     dbe:descriptionTemplate """%%res%% divorced %%spouse%%.""" ;
@@ -217,8 +207,6 @@ dig:AIRCRAFTOCCURRENCE a dbe:DigestTemplate ;
                 dbprop:origin ?origin ;
                 dbprop:destination ?destination ;
                 dbprop:occurenceType ?type ] . }""" ;
-#    dbe:contextQueryString """SELECT ?label
-#        { %%res%% rdfs:label ?label . }""" ;
     dbe:contextQueryString """SELECT ?label ?labelorigin ?labeldestination
         { %%res%% rdfs:label ?label .
           %%origin%% rdfs:label ?labelorigin .
