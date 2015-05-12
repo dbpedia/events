@@ -1,8 +1,16 @@
 package org.dbpedia.events;
 
 import com.google.common.collect.*;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.datatypes.xsd.impl.XSDDateTimeType;
+import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Node_Literal;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.sparql.util.Context;
+import com.hp.hpl.jena.sparql.util.Symbol;
+import com.hp.hpl.jena.vocabulary.XSD;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
@@ -12,6 +20,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RiotException;
+import org.apache.xerces.xs.datatypes.XSDateTime;
 import org.dbpedia.events.model.DigestItem;
 import org.dbpedia.events.model.DigestTemplate;
 import org.dbpedia.events.vocabs.GuoOntology;
@@ -19,6 +28,7 @@ import org.dbpedia.events.vocabs.ProvOntology;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,11 +94,11 @@ public class DBpediaLiveDigest {
     }
 
     public static void main(String[] args) throws Exception {
-//        String start = "2015-05-03-00";
-//        String end   = "2015-05-03-23";
+        String start = "2015-04-19-19";
+        String end   = "2015-04-19-19";
 
-        String start = args[0];
-        String end   = args[1];
+//        String start = args[0];
+//        String end   = args[1];
 
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd-HH");
         DateTime timeStart = fmt.parseDateTime(start);
@@ -121,6 +131,26 @@ public class DBpediaLiveDigest {
 
         QueryExecutionFactory updateQueryExecutionFactory = new QueryExecutionFactoryModel(updateModel);
 
+
+        /**
+
+        QueryExecution qe = updateQueryExecutionFactory.createQueryExecution(PrefixService.getSparqlPrefixDecl() +
+                "SELECT DISTINCT ?deathDate (NOW() AS ?now) (NOW()-\"P21D\"^^xsd:duration AS ?latest) WHERE {?x dbo:deathDate ?deathDate}");
+        // Set the query execution date to the last second of the day
+        dig.setQueryExecutionDatetime(qe, dig.getEnd().plusMinutes(59).plusSeconds(59));
+
+        ResultSet rs = qe.execSelect();
+
+        while (rs.hasNext()) {
+            QuerySolution r = rs.nextSolution();
+
+            for (String var : rs.getResultVars()) {
+                L.info("VAR " + var + " = " + r.get(var));
+            }
+        }
+
+        //**/
+
         Collection<DigestItem> digestItems = new ArrayList<DigestItem>();
 
         for (DigestTemplate digestTemplate : digestTemplates) {
@@ -151,6 +181,10 @@ public class DBpediaLiveDigest {
         L.info("Test " + digestTemplate.getDescription());
 
         QueryExecution qe = updateModelQef.createQueryExecution(PrefixService.getSparqlPrefixDecl() + queryString);
+
+        // Set the query execution date to the last second of the day
+        setQueryExecutionDatetime(qe, getEnd().plusMinutes(59).plusSeconds(59));
+
         ResultSet rs = qe.execSelect();
 
         if (!rs.hasNext()) {
@@ -232,6 +266,8 @@ public class DBpediaLiveDigest {
 
                 return true;
             }
+        } catch(Exception e) {
+            L.error("Exception while excuting \"" + queryString + "\".", e);
         } finally {
             if (qe != null) {
                 qe.close();
@@ -429,6 +465,21 @@ public class DBpediaLiveDigest {
         return fmt.print(start) + "/--/" + fmt.print(end);
     }
 
+    private void setQueryExecutionDatetime(QueryExecution qe, DateTime time) {
+        // Set the query execution date to the last second of the day
+        Context qc = qe.getContext();
+        for (Symbol s: qc.keys()) {
+            if (s.getSymbol().equals("http://jena.hpl.hp.com/ARQ/system#now")) {
+                DateTimeFormatter isofmt = ISODateTimeFormat.dateTime();
+                qc.set(s, NodeFactory.createLiteral(time.toString(isofmt), XSDDateTimeType.XSDdateTime));
+                L.debug("Set QueryExecution time http://jena.hpl.hp.com/ARQ/system#now to: " + ((Node_Literal) qc.get(s)).toString());
+                return;
+            }
+        }
+
+        L.warn("QueryExecution time not set.");
+    }
+
     public DateTime getStart() {
         return start;
     }
@@ -469,7 +520,7 @@ public class DBpediaLiveDigest {
                     changesetFiles.size() + " files");
 
             if (insertStmts.isEmpty() && deleteStmts.isEmpty()) {
-               continue;
+                continue;
             }
 
             Resource update = updateModel.createResource(

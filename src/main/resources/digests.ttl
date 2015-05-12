@@ -5,6 +5,21 @@
 @prefix dc:         <http://purl.org/dc/elements/1.1/> .
 @prefix spin:       <http://spinrdf.org/spin#> .
 
+dig:DEADPEOPLEWOF a dbe:DigestTemplate ;
+    dbe:ignore true ;
+    dcterms:identifier "DEADPEOPLEWOF" ;
+    dcterms:description """Finds people who died."""@en ;
+    dbe:queryString """SELECT ?u ?res ?deathdate ?deathplace
+        { ?u guo:target_subject ?res ;
+            guo:insert [
+                dbo:deathDate ?deathdate ;
+                dbo:deathPlace ?deathplace ] . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labeldeathplace
+        { %%res%% rdfs:label ?label .
+          %%deathplace%% rdfs:label ?labeldeathplace . }""" ;
+    dbe:descriptionTemplate """%%res%% died on %%deathdate%% in %%deathplace%%.""" ;
+    .
+
 dig:DEADPEOPLE a dbe:DigestTemplate ;
     dcterms:identifier "DEADPEOPLE" ;
     dcterms:description """Finds people who died within last three weeks."""@en ;
@@ -13,7 +28,7 @@ dig:DEADPEOPLE a dbe:DigestTemplate ;
             guo:insert [
                 dbo:deathDate ?deathdate ;
                 dbo:deathPlace ?deathplace ] .
-            FILTER (xsd:date(?deathdate) > NOW()-1814400) }""" ;
+            FILTER (xsd:date(?deathdate) > xsd:date(NOW()-"P21D"^^xsd:duration)) }""" ;
     dbe:contextQueryString """SELECT ?label ?labeldeathplace
         { %%res%% rdfs:label ?label .
           %%deathplace%% rdfs:label ?labeldeathplace . }""" ;
@@ -27,7 +42,7 @@ dig:RELEASED a dbe:DigestTemplate ;
         { ?u guo:target_subject ?res ;
             guo:insert [
                 dbo:releaseDate ?releasedate ] .
-            FILTER (xsd:date(?releasedate) > NOW()-1814400) }""" ;
+            FILTER (xsd:date(?releasedate) > xsd:date(NOW()-"P21D"^^xsd:duration)) }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%% is released on %%releasedate%%.""" ;
@@ -40,7 +55,7 @@ dig:INTRODUCED a dbe:DigestTemplate ;
         { ?u guo:target_subject ?res ;
             guo:insert [
                 dbo:introductionDate ?introductionDate ] .
-            FILTER (xsd:date(?introductionDate) > NOW()-1814400) }""" ;
+            FILTER (xsd:date(?introductionDate) > xsd:date(NOW()-"P21D"^^xsd:duration)) }""" ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%% is introduced on %%introductionDate%%.""" ;
@@ -68,6 +83,7 @@ dig:RISINGNUMBERS a dbe:DigestTemplate ;
     .
 
 dig:HEADHUNTED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "HEADHUNTED" ;
     dcterms:description """Team changed."""@en ;
     dbe:queryString """SELECT ?u ?res ?oldTeam ?newTeam
@@ -180,7 +196,9 @@ dig:JUSTMARRIED a dbe:DigestTemplate ;
           FILTER NOT EXISTS { ?u guo:insert/dbo:spouse ?spouse2 . FILTER (?spouse != ?spouse2) } }""" ;
     dbe:contextQueryString """SELECT ?label ?labelspouse
         { %%res%% rdfs:label ?label .
-          %%spouse%% rdfs:label ?labelspouse . }""" ;
+          %%spouse%% rdfs:label ?labelspouse .
+          FILTER NOT EXISTS { %%res%% dbo:deathDate ?deathDate }
+          FILTER NOT EXISTS { %%spouse%% dbo:deathDate ?deathDate } }""" ;
     dbe:descriptionTemplate """%%res%% married %%spouse%%.""" ;
     .
 
@@ -193,7 +211,9 @@ dig:JUSTDIVORCED a dbe:DigestTemplate ;
                 dbo:spouse ?spouse ] . }""" ;
     dbe:contextQueryString """SELECT ?label ?labelspouse
         { %%res%% rdfs:label ?label .
-          %%spouse%% rdfs:label ?labelspouse . }""" ;
+          %%spouse%% rdfs:label ?labelspouse .
+          FILTER NOT EXISTS { %%res%% dbo:deathDate ?deathDate }
+          FILTER NOT EXISTS { %%spouse%% dbo:deathDate ?deathDate } }""" ;
     dbe:descriptionTemplate """%%res%% divorced %%spouse%%.""" ;
     .
 
@@ -225,4 +245,17 @@ dig:VOLCANO a dbe:DigestTemplate ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """Eruption of %%res%%.""" ;
+    .
+
+dig:AWARDED a dbe:DigestTemplate ;
+    dcterms:identifier "AWARDED" ;
+    dcterms:description """Award receptions."""@en ;
+    dbe:queryString """SELECT ?u ?res ?award
+        { ?u guo:target_subject ?res ;
+            guo:insert [
+                dbo:award ?award ] . }""" ;
+    dbe:contextQueryString """SELECT ?label ?labelaward
+        { %%res%% rdfs:label ?label .
+          %%award%% rdfs:label ?labelaward . }""" ;
+    dbe:descriptionTemplate """%%res%% awarded with the %%award%%.""" ;
     .
