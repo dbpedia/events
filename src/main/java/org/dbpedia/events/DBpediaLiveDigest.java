@@ -94,9 +94,6 @@ public class DBpediaLiveDigest {
         String start = args[0];
         String end   = args[1];
 
-        start = "2015-04-19-19";
-        end   = "2015-04-19-19";
-
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd-HH");
         DateTime timeStart = fmt.parseDateTime(start);
         DateTime timeEnd = fmt.parseDateTime(end);
