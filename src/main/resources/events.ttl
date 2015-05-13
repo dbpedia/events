@@ -14,7 +14,7 @@
     <http://purl.org/vocab/vann/preferredNamespacePrefix> "dbe" ;
     <http://purl.org/vocab/vann/preferredNamespaceUri> "http://events.dbpedia.org/ns/core#" ;
 
-    owl:versionInfo "0.1" ;
+    owl:versionInfo "0.2" ;
 
     rdfs:label "DBpedia Events Ontology"@en ;
     dcterms:title "DBpedia Events Ontology"@en ;
@@ -43,13 +43,55 @@ dbe:Event
     a owl:Class ;
     rdfs:label "Event"@en .
 
+dbe:Digest
+    a owl:Class ;
+    rdfs:label "Digest"@en .
+
 dbe:update
     a owl:ObjectProperty ;
+    rdfs:label "update"@en ;
     rdfs:domain dbe:Event ;
     rdfs:range guo:UpdateInstruction .
 
+dbe:digest
+    a owl:ObjectProperty ;
+    rdfs:label "digest"@en ;
+    rdfs:domain dbe:Event ;
+    rdfs:range dbe:Digest .
+
+dbe:resourceIndegree
+    a owl:DatatypeProperty ;
+    rdfs:label "resource indegree"@en ;
+    rdfs:domain dbe:Event ;
+    rdfs:range xsd:integer .
+
+dbe:resourceOutdegree
+    a owl:DatatypeProperty ;
+    rdfs:label "resource outdegree"@en ;
+    rdfs:domain dbe:Event ;
+    rdfs:range xsd:integer .
+
+dbe:numberOfChangesetFiles
+    a owl:DatatypeProperty ;
+    rdfs:label "number of changeset files"@en ;
+    rdfs:domain dbe:Event ;
+    rdfs:range xsd:integer .
+
+dbe:daysSinceLastWikipageModified
+    a owl:DatatypeProperty ;
+    rdfs:label "days since last wikipage modified"@en ;
+    rdfs:domain dbe:Event ;
+    rdfs:range xsd:integer .
+
+dbe:rankValue
+    a owl:DatatypeProperty ;
+    rdfs:label "rank value"@en ;
+    rdfs:domain dbe:Event ;
+    rdfs:range xsd:float .
+
 dbe:context
     a owl:ObjectProperty ;
+    rdfs:label "context"@en ;
     rdfs:domain dbe:Event .
 
 ####################################################################
@@ -83,3 +125,9 @@ dbe:ignore
     rdfs:label "ignore"@en ;
     rdfs:domain dbe:DigestTemplate ;
     rdfs:range xsd:boolean .
+
+dbe:rankWeight
+    a owl:DatatypeProperty ;
+    rdfs:label "rank weight"@en ;
+    rdfs:domain dbe:DigestTemplate ;
+    rdfs:range xsd:float .

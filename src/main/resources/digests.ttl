@@ -4,6 +4,7 @@
 @prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix dc:         <http://purl.org/dc/elements/1.1/> .
 @prefix spin:       <http://spinrdf.org/spin#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
 
 dig:DEADPEOPLEWOF a dbe:DigestTemplate ;
     dbe:ignore true ;
@@ -18,6 +19,7 @@ dig:DEADPEOPLEWOF a dbe:DigestTemplate ;
         { %%res%% rdfs:label ?label .
           %%deathplace%% rdfs:label ?labeldeathplace . }""" ;
     dbe:descriptionTemplate """%%res%% died on %%deathdate%% in %%deathplace%%.""" ;
+    dbe:rankWeight "0.8"^^xsd:float ;
     .
 
 dig:DEADPEOPLE a dbe:DigestTemplate ;
@@ -29,10 +31,11 @@ dig:DEADPEOPLE a dbe:DigestTemplate ;
                 dbo:deathDate ?deathdate ;
                 dbo:deathPlace ?deathplace ] .
             FILTER (xsd:date(?deathdate) > xsd:date(NOW()-"P21D"^^xsd:duration)) }""" ;
-    dbe:contextQueryString """SELECT ?label ?labeldeathplace
-        { %%res%% rdfs:label ?label .
+    dbe:contextQueryString """SELECT ?labelres ?labeldeathplace
+        { %%res%% rdfs:label ?labelres .
           %%deathplace%% rdfs:label ?labeldeathplace . }""" ;
-    dbe:descriptionTemplate """%%res%% died on %%deathdate%% in %%deathplace%%.""" ;
+    dbe:descriptionTemplate """%%labelres%% died on %%deathdate%% in %%labeldeathplace%%.""" ;
+    dbe:rankWeight "0.8"^^xsd:float ;
     .
 
 dig:RELEASED a dbe:DigestTemplate ;
@@ -46,6 +49,7 @@ dig:RELEASED a dbe:DigestTemplate ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%% is released on %%releasedate%%.""" ;
+    dbe:rankWeight "0.6"^^xsd:float ;
     .
 
 dig:INTRODUCED a dbe:DigestTemplate ;
@@ -59,6 +63,7 @@ dig:INTRODUCED a dbe:DigestTemplate ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%% is introduced on %%introductionDate%%.""" ;
+    dbe:rankWeight "0.8"^^xsd:float ;
     .
 
 dig:RISINGNUMBERS a dbe:DigestTemplate ;
@@ -80,10 +85,10 @@ dig:RISINGNUMBERS a dbe:DigestTemplate ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """%%res%%'s %%p%% raised from %%old%% to %%new%%.""" ;
+    dbe:rankWeight "0.1"^^xsd:float ;
     .
 
 dig:HEADHUNTED a dbe:DigestTemplate ;
-    dbe:ignore true ;
     dcterms:identifier "HEADHUNTED" ;
     dcterms:description """Team changed."""@en ;
     dbe:queryString """SELECT ?u ?res ?oldTeam ?newTeam
@@ -97,6 +102,7 @@ dig:HEADHUNTED a dbe:DigestTemplate ;
           %%oldTeam%% rdfs:label ?labeloldTeam .
           %%newTeam%% rdfs:label ?labelnewTeam . }""" ;
     dbe:descriptionTemplate """%%res%% switches from %%oldTeam%% to %%newTeam%%.""" ;
+    dbe:rankWeight "0.2"^^xsd:float ;
     .
 
 dig:PRESIDENT a dbe:DigestTemplate ;
@@ -114,6 +120,7 @@ dig:PRESIDENT a dbe:DigestTemplate ;
           %%oldPres%% rdfs:label ?labeloldPres .
           %%newPres%% rdfs:label ?labelnewPres . }""" ;
     dbe:descriptionTemplate """%%newPres%% succeeds %%oldPres%% as the president of %%res%%.""" ;
+    dbe:rankWeight "0.6"^^xsd:float ;
     .
 
 dig:LEADER a dbe:DigestTemplate ;
@@ -130,6 +137,7 @@ dig:LEADER a dbe:DigestTemplate ;
           %%oldLeader%% rdfs:label ?labeloldLeader .
           %%newLeader%% rdfs:label ?labelnewLeader . }""" ;
     dbe:descriptionTemplate """%%newLeader%% succeeds %%oldLeader%% as the leader of %%res%%.""" ;
+    dbe:rankWeight "0.6"^^xsd:float ;
     .
 
 dig:EUROPE2015 a dbe:DigestTemplate ;
@@ -144,6 +152,7 @@ dig:EUROPE2015 a dbe:DigestTemplate ;
     dbe:paramQueryString """SELECT ?category
         { ?category skos:broader dbc:2015_in_Europe . }""" ;
     dbe:descriptionTemplate """Highlighted event for Europe in 2015 %%res%%.""" ;
+    dbe:rankWeight "0.8"^^xsd:float ;
     .
 
 dig:GRANDPRIX a dbe:DigestTemplate ;
@@ -167,6 +176,7 @@ dig:GRANDPRIX a dbe:DigestTemplate ;
           %%thirdD%% rdfs:label ?labelthirdD .
           %%thirdT%% rdfs:label ?labelthirdT . }""" ;
     dbe:descriptionTemplate """%%firstD (%%firstT%%) wins %%res%%, %%secondD%% (%%secondT%%) got second, %%thirdD%% (%%thirdT%%) third.""" ;
+    dbe:rankWeight "0.6"^^xsd:float ;
     .
 
 dig:PODIUM a dbe:DigestTemplate ;
@@ -184,6 +194,7 @@ dig:PODIUM a dbe:DigestTemplate ;
           %%silver%% rdfs:label ?labelsilver .
           %%bronze%% rdfs:label ?labelbronze . }""" ;
     dbe:descriptionTemplate """Gold for %%gold%%, Silver for %%silver%%, Bronze for %%bronze%% in %%res%%.""" ;
+    dbe:rankWeight "0.6"^^xsd:float ;
     .
 
 dig:JUSTMARRIED a dbe:DigestTemplate ;
@@ -200,6 +211,7 @@ dig:JUSTMARRIED a dbe:DigestTemplate ;
           FILTER NOT EXISTS { %%res%% dbo:deathDate ?deathDate }
           FILTER NOT EXISTS { %%spouse%% dbo:deathDate ?deathDate } }""" ;
     dbe:descriptionTemplate """%%res%% married %%spouse%%.""" ;
+    dbe:rankWeight "0.4"^^xsd:float ;
     .
 
 dig:JUSTDIVORCED a dbe:DigestTemplate ;
@@ -215,6 +227,7 @@ dig:JUSTDIVORCED a dbe:DigestTemplate ;
           FILTER NOT EXISTS { %%res%% dbo:deathDate ?deathDate }
           FILTER NOT EXISTS { %%spouse%% dbo:deathDate ?deathDate } }""" ;
     dbe:descriptionTemplate """%%res%% divorced %%spouse%%.""" ;
+    dbe:rankWeight "0.2"^^xsd:float ;
     .
 
 dig:AIRCRAFTOCCURRENCE a dbe:DigestTemplate ;
@@ -232,6 +245,7 @@ dig:AIRCRAFTOCCURRENCE a dbe:DigestTemplate ;
           %%origin%% rdfs:label ?labelorigin .
           %%destination%% rdfs:label ?labeldestination . }""" ;
     dbe:descriptionTemplate """%%type%% with %%res%% from %%origin%% to %%destination%%.""" ;
+    dbe:rankWeight "0.8"^^xsd:float ;
     .
 
 dig:VOLCANO a dbe:DigestTemplate ;
@@ -245,6 +259,7 @@ dig:VOLCANO a dbe:DigestTemplate ;
     dbe:contextQueryString """SELECT ?label
         { %%res%% rdfs:label ?label . }""" ;
     dbe:descriptionTemplate """Eruption of %%res%%.""" ;
+    dbe:rankWeight "0.8"^^xsd:float ;
     .
 
 dig:AWARDED a dbe:DigestTemplate ;
@@ -258,4 +273,5 @@ dig:AWARDED a dbe:DigestTemplate ;
         { %%res%% rdfs:label ?label .
           %%award%% rdfs:label ?labelaward . }""" ;
     dbe:descriptionTemplate """%%res%% awarded with the %%award%%.""" ;
+    dbe:rankWeight "0.4"^^xsd:float ;
     .

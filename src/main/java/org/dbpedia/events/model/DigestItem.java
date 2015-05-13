@@ -1,15 +1,21 @@
 package org.dbpedia.events.model;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.DCTerms;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.dbpedia.events.DBpediaLiveDigest;
 import org.dbpedia.events.PrefixService;
 import org.dbpedia.events.vocabs.EventsOntology;
 import org.dbpedia.events.vocabs.ProvOntology;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
 
 import java.util.*;
 
@@ -27,7 +33,7 @@ public class DigestItem {
     private String description;
     private Collection<Resource> changesetFiles;
     private Map<String, Model> updateInstruction;
-    private Map<String, Model> snaphots;
+    private Map<String, Model> snapshots;
 
     public DigestItem(DBpediaLiveDigest digest, DigestTemplate digestTemplate, String res, String u) {
         this.digest = digest;
@@ -36,7 +42,7 @@ public class DigestItem {
         this.update = u;
 
         this.changesetFiles = new HashSet<Resource>();
-        this.snaphots = new HashMap<String, Model>();
+        this.snapshots = new HashMap<String, Model>();
         this.updateInstruction = new HashMap<String, Model>();
         this.bindings = new HashMap<String, RDFNode>();
     }
@@ -60,7 +66,7 @@ public class DigestItem {
     }
 
     public void addSnapshot(String res, Model model) {
-        this.snaphots.put(res, model);
+        this.snapshots.put(res, model);
     }
 
     public void setUpdateInstruction(String uri, Model updateInstruction) {
@@ -92,8 +98,8 @@ public class DigestItem {
         return updateInstruction;
     }
 
-    public Map<String, Model> getSnaphots() {
-        return snaphots;
+    public Map<String, Model> getSnapshots() {
+        return snapshots;
     }
 
     public Map<String, RDFNode> getBindings() { return bindings; }
@@ -109,12 +115,12 @@ public class DigestItem {
 
     public Resource getAsResource(Model model) {
         //String uri = PatchrUtils.generateUri(prefix, "patch");
-        Resource event = model.createResource(digest.getDatasetBase() + "item/" + this.getId(),
+        Resource event = model.createResource(this.digest.getDatasetBase() + "item/" + this.getId(),
                 EventsOntology.Event);
 
         // add timestamp
-        DateTime time = new DateTime(Calendar.getInstance().getTime());
-        event.addProperty(ProvOntology.generatedAtTime, model.createTypedLiteral(time, XSDDatatype.XSDdateTime));
+        //DateTime time = new DateTime(Calendar.getInstance().getTime());
+        event.addProperty(ProvOntology.generatedAtTime, model.createTypedLiteral(this.digest.getEnd(), XSDDatatype.XSDdateTime));
 
         // add derivedFroms
         event.addProperty(ProvOntology.wasDerivedFrom, PrefixService.getNamespaceForPrefix("dig") + this.getDigestTemplate().getId());
@@ -129,15 +135,61 @@ public class DigestItem {
         }
 
         // add snapshots
-        for (String key: this.snaphots.keySet()) {
-            event.addProperty(EventsOntology.context, this.snaphots.get(key).getResource(key));
+        for (String key: this.snapshots.keySet()) {
+            event.addProperty(EventsOntology.context, this.snapshots.get(key).getResource(key));
             // model.add(this.snaphots.get(key));
         }
+
+        // add statistics
+        int unmodifiedDays = 0;
+        int outdegree = 0;
+        int indegree = 0;
+
+        // get unmodified days
+        QueryExecutionFactory qef = new QueryExecutionFactoryModel(this.updateInstruction.get(this.updateInstruction.keySet().toArray()[0]));
+        QueryExecution qe = qef.createQueryExecution(PrefixService.getSparqlPrefixDecl() +
+                "SELECT DISTINCT ((xsd:date(NOW()) - xsd:date(?mod)) AS ?days) {?u guo:delete/dbo:wikiPageModified ?mod}");
+        digest.setQueryExecutionDatetime(qe, digest.getEnd());
+        ResultSet rs = qe.execSelect();
+        if (!rs.hasNext()) {
+            this.digest.L.debug("No modified date.");
+        } else while (rs.hasNext()) {
+            QuerySolution r = rs.nextSolution();
+            this.digest.L.debug("Unmodified days = " + r.get("days"));
+            Period unmodified = Period.parse(r.get("days").asLiteral().getString());
+            unmodifiedDays = unmodified.getDays();
+        }
+
+        // get indegree and outdegree
+        Map<String, Integer> inoutdegree = digest.getInOutDegree(this.resource);
+        indegree = inoutdegree.get("indegree");
+        outdegree = inoutdegree.get("outdegree");
+
+        event.addProperty(EventsOntology.numberOfChangesetFiles, model.createTypedLiteral(changesetFiles.size(), XSDDatatype.XSDinteger));
+        event.addProperty(EventsOntology.daysSinceLastWikipageModified, model.createTypedLiteral(unmodifiedDays, XSDDatatype.XSDinteger));
+        event.addProperty(EventsOntology.resourceIndegree, model.createTypedLiteral(indegree, XSDDatatype.XSDinteger));
+        event.addProperty(EventsOntology.resourceOutdegree, model.createTypedLiteral(outdegree, XSDDatatype.XSDinteger));
+
+        float rankValue = computeRankValue(changesetFiles.size(), unmodifiedDays, indegree, outdegree, digestTemplate.getRankWeight());
+        event.addProperty(EventsOntology.rankValue, model.createTypedLiteral(rankValue, XSDDatatype.XSDfloat));
 
         // add description
         event.addProperty(DCTerms.description, model.createLiteral(this.getDescription(), "en"));
 
         return event;
+    }
+
+    private float computeRankValue(int numberOfChangesetFiles, int daysSinceLastWikipageModified, int resourceIndegree, int resourceOutdegree, float rankWeight) {
+        float result = 0;
+
+        result += ((float) Math.min(numberOfChangesetFiles, 48)) / 48;
+        result += ((float) 356 - Math.min(daysSinceLastWikipageModified, 356)) / 356;
+        // avg indegree from http://jens-lehmann.org/files/2009/dbpedia_jws.pdf
+        result += ((float) resourceIndegree) / 11.03;
+        result += ((float) resourceOutdegree) / 55.15;
+        result += ((float) Math.min(rankWeight, 1.));
+
+        return result;
     }
 
 }

@@ -21,9 +21,9 @@ public class DigestTemplate {
     private final String contextQuery;
     private final String paramQuery;
     private final String descriptionTemplate;
+    private final float rankWeight;
 
-    public DigestTemplate(String id, String description, String sparqlQuery, String contextQuery, String paramQuery, String descriptionTemplate) {
-
+    public DigestTemplate(String id, String description, String sparqlQuery, String contextQuery, String paramQuery, String descriptionTemplate, float rankWeight) {
         assert id != null;
         this.id = id;
 
@@ -40,6 +40,8 @@ public class DigestTemplate {
 
         assert descriptionTemplate != null;
         this.descriptionTemplate = descriptionTemplate;
+
+        this.rankWeight = rankWeight;
     }
 
     public String getId() { return id; }
@@ -54,9 +56,9 @@ public class DigestTemplate {
 
     public String getParamQuery() { return paramQuery; }
 
-    public String getDescriptionTemplate() {
-        return descriptionTemplate;
-    }
+    public String getDescriptionTemplate() { return descriptionTemplate; }
+
+    public float getRankWeight() { return rankWeight; }
 
     public static Collection<DigestTemplate> instantiateDigestsFromModel(QueryExecutionFactory queryFactory) {
         final String sparqlSelect = PrefixService.getSparqlPrefixDecl() +
@@ -91,13 +93,14 @@ public class DigestTemplate {
 
     private static DigestTemplate getDigest(QueryExecutionFactory queryFactory, String digestURI) {
         final String sparqlSelect = PrefixService.getSparqlPrefixDecl() +
-                "SELECT DISTINCT ?digest ?id ?desc ?query ?contextquery ?template WHERE { " +
+                "SELECT DISTINCT ?digest ?id ?desc ?query ?contextquery ?template ?rankweight WHERE { " +
                 "  %%DIGESTURI%% a dbe:DigestTemplate ; " +
                 "  dcterms:identifier ?id ; " +
                 "  dcterms:description ?desc ; " +
                 "  dbe:queryString ?query ;" +
                 "  dbe:contextQueryString ?contextquery ;" +
-                "  dbe:descriptionTemplate ?template . }";
+                "  dbe:descriptionTemplate ?template ;" +
+                "  dbe:rankWeight ?rankweight . }";
 
         DigestTemplate digestTemplate = null;
         QueryExecution qe = null;
@@ -113,8 +116,9 @@ public class DigestTemplate {
                 String query = qs.get("query").toString();
                 String contextQuery = qs.get("contextquery").toString();
                 String template = qs.get("template").toString();
+                float rankWeight = qs.get("rankweight").asLiteral().getFloat();
 
-                digestTemplate = new DigestTemplate(id, desc, query, contextQuery, null, template);
+                digestTemplate = new DigestTemplate(id, desc, query, contextQuery, null, template, rankWeight);
 
                 // if multiple results returns something is wrong
                 if (results.hasNext()) {
@@ -131,7 +135,6 @@ public class DigestTemplate {
     }
 
     public String getAsResource(Model model) {
-
         return null;
     }
 }

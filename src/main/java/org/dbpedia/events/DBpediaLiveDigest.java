@@ -1,28 +1,25 @@
 package org.dbpedia.events;
 
 import com.google.common.collect.*;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.datatypes.xsd.impl.XSDDateTimeType;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Node_Literal;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.sparql.util.Symbol;
-import com.hp.hpl.jena.vocabulary.XSD;
+import com.hp.hpl.jena.vocabulary.DCTerms;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RiotException;
-import org.apache.xerces.xs.datatypes.XSDateTime;
 import org.dbpedia.events.model.DigestItem;
 import org.dbpedia.events.model.DigestTemplate;
+import org.dbpedia.events.vocabs.EventsOntology;
 import org.dbpedia.events.vocabs.GuoOntology;
 import org.dbpedia.events.vocabs.ProvOntology;
 import org.joda.time.DateTime;
@@ -64,7 +61,7 @@ public class DBpediaLiveDigest {
     private String datasetBase;
     private String datasetTargetfolder;
 
-    private static Logger L = LoggerFactory.getLogger(DBpediaLiveDigest.class);
+    public static Logger L = LoggerFactory.getLogger(DBpediaLiveDigest.class);
 
     public DBpediaLiveDigest(DateTime start, DateTime end) throws ConfigurationException {
         this();
@@ -94,11 +91,11 @@ public class DBpediaLiveDigest {
     }
 
     public static void main(String[] args) throws Exception {
-//        String start = "2015-04-19-19";
-//        String end   = "2015-04-19-19";
-
         String start = args[0];
         String end   = args[1];
+
+        start = "2015-04-19-19";
+        end   = "2015-04-19-19";
 
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd-HH");
         DateTime timeStart = fmt.parseDateTime(start);
@@ -130,7 +127,6 @@ public class DBpediaLiveDigest {
         L.info("Model has " + updateModel.listStatements().toList().size() + " statements.");
 
         QueryExecutionFactory updateQueryExecutionFactory = new QueryExecutionFactoryModel(updateModel);
-
 
         /**
 
@@ -168,7 +164,6 @@ public class DBpediaLiveDigest {
         return DigestTemplate.instantiateDigestsFromModel(digestQueryFactory);
     }
 
-
     private Collection<DigestItem> testQuery(QueryExecutionFactory updateModelQef, DigestTemplate digestTemplate) {
         Set<Property> insertDeletePropSet = new HashSet<>(2);
         insertDeletePropSet.add(GuoOntology.delete);
@@ -183,7 +178,7 @@ public class DBpediaLiveDigest {
         QueryExecution qe = updateModelQef.createQueryExecution(PrefixService.getSparqlPrefixDecl() + queryString);
 
         // Set the query execution date to the last second of the day
-        setQueryExecutionDatetime(qe, getEnd().plusMinutes(59).plusSeconds(59));
+        setQueryExecutionDatetime(qe, getEnd());
 
         ResultSet rs = qe.execSelect();
 
@@ -209,19 +204,19 @@ public class DBpediaLiveDigest {
 
             if (validateDigestItem(digestItem)) {
                 // create description from template
-                for (String var : rs.getResultVars()) {
+                for (String var : bindings.keySet()) {
                     if (descriptionTemplate.contains("%%" + var + "%%")) {
-                        L.debug("    " + var + " " + r.get(var).toString());
-                        if (r.get(var).isLiteral())
-                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", r.get(var).asLiteral().getLexicalForm().replace("$", "\\$"));
-                        else if (r.get(var).isURIResource())
-                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", getLabelForResource(r.get(var).asResource().getURI()).replace("$", "\\$"));
+                        L.debug("    " + var + " " + bindings.get(var).toString());
+                        if (bindings.get(var).isLiteral())
+                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", bindings.get(var).asLiteral().getLexicalForm().replace("$", "\\$"));
+                        else if (bindings.get(var).isURIResource())
+                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", getLabelForResource(bindings.get(var).asResource().getURI()).replace("$", "\\$"));
                         else
-                            L.warn("Unhandled type " + r.get(var));
+                            L.warn("Unhandled type " + bindings.get(var));
                     }
                 }
                 digestItem.setDescription(descriptionTemplate);
-                L.info("*** " + descriptionTemplate + " *** " + getPagerankForResource(res));
+                L.info("*** " + descriptionTemplate + " *** ");
 
                 // get changesetFiles
                 digestItem.setChangesetFiles(getChangesetFilesForUpdate(updateModelQef, u));
@@ -259,10 +254,18 @@ public class DBpediaLiveDigest {
             }
 
             qe = queryFactory.createQueryExecution(PrefixService.getSparqlPrefixDecl() + queryString);
-            ResultSet results = qe.execSelect();
+            ResultSet rs = qe.execSelect();
 
-            if (results.hasNext()) {
+            if (rs.hasNext()) {
                 // TODO add to digestbindings and reuse labels for descriptiontemplate
+                while (rs.hasNext()) {
+                    QuerySolution r = rs.nextSolution();
+
+                    for (String var : rs.getResultVars()) {
+                        L.debug("VAR " + var + " = " + r.get(var));
+                        bindings.put(var, r.get(var));
+                    }
+                }
 
                 return true;
             }
@@ -316,6 +319,28 @@ public class DBpediaLiveDigest {
         }
 */
         return model;
+    }
+
+    public Map<String, Integer> getInOutDegree(String uri) {
+        Map<String, Integer> result = new HashMap<>();
+
+        String queryString = "SELECT (COUNT(DISTINCT ?s) AS ?indegree) (COUNT(DISTINCT ?o) AS ?outdegree) { " +
+            "{?s ?p %%URI%% . FILTER( REGEX(?s, \"^http://dbpedia.org/resource/\") ) } " +
+            "  UNION " +
+            "{%%URI%% ?p ?o . FILTER( ISURI(?o) && REGEX(?o, \"^http://dbpedia.org/resource/\") ) } " +
+            "}";
+
+        QueryExecution qe = this.queryFactory.createQueryExecution(PrefixService.getSparqlPrefixDecl() +
+                queryString.replaceAll("%%URI%%", "<" + uri + ">"));
+        ResultSet rs = qe.execSelect();
+
+        if (rs.hasNext()) {
+            QuerySolution r = rs.nextSolution();
+            result.put("indegree", r.get("indegree").asLiteral().getInt());
+            result.put("outdegree", r.get("outdegree").asLiteral().getInt());
+        }
+
+        return result;
     }
 
     private Model getModelForResource(QueryExecutionFactory qef, String uriFrom, String uriTo) {
@@ -412,6 +437,7 @@ public class DBpediaLiveDigest {
         return (label != null) ? label : uri;
     }
 
+    @Deprecated
     private float getPagerankForResource(String uri) {
         String queryString = "SELECT ?pagerank WHERE { " +
                 "%%URI%% dbo:wikiPageRank ?pagerank . }";
@@ -465,13 +491,13 @@ public class DBpediaLiveDigest {
         return fmt.print(start) + "/--/" + fmt.print(end);
     }
 
-    private void setQueryExecutionDatetime(QueryExecution qe, DateTime time) {
+    public void setQueryExecutionDatetime(QueryExecution qe, DateTime time) {
         // Set the query execution date to the last second of the day
         Context qc = qe.getContext();
         for (Symbol s: qc.keys()) {
             if (s.getSymbol().equals("http://jena.hpl.hp.com/ARQ/system#now")) {
                 DateTimeFormatter isofmt = ISODateTimeFormat.dateTime();
-                qc.set(s, NodeFactory.createLiteral(time.toString(isofmt), XSDDateTimeType.XSDdateTime));
+                qc.set(s, NodeFactory.createLiteral(time.toString(isofmt), XSDDatatype.XSDdateTime));
                 L.debug("Set QueryExecution time http://jena.hpl.hp.com/ARQ/system#now to: " + ((Node_Literal) qc.get(s)).toString());
                 return;
             }
@@ -485,7 +511,7 @@ public class DBpediaLiveDigest {
     }
 
     public DateTime getEnd() {
-        return end;
+        return end.plusMinutes(59).plusSeconds(59);
     }
 
     public String getDatasetBase() {
@@ -733,9 +759,17 @@ public class DBpediaLiveDigest {
         try {
             Model model = ModelFactory.createDefaultModel();
 
+            Resource digest = model.createResource(this.getDatasetBase() + "digest/" + this.getDigestId(),
+                    EventsOntology.Digest);
+
+            digest.addProperty(DCTerms.identifier, model.createLiteral(this.getDigestId()));
+            digest.addProperty(ProvOntology.startedAtTime, model.createTypedLiteral(this.getStart(), XSDDatatype.XSDdateTime));
+            digest.addProperty(ProvOntology.endedAtTime, model.createTypedLiteral(this.getEnd(), XSDDatatype.XSDdateTime));
+
             for (DigestItem item: digestItems) {
                 Resource event = item.getAsResource(model);
-                serializeSnapshots(item.getSnaphots());
+                event.addProperty(EventsOntology.digest, digest);
+                serializeSnapshots(item.getSnapshots());
             }
 
             datasetFilePath = Paths.get(datasetTargetfolder, "dataset", this.getDigestId() + ".ttl");
