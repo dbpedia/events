@@ -94,11 +94,11 @@ public class DBpediaLiveDigest {
     }
 
     public static void main(String[] args) throws Exception {
-        String start = "2015-04-19-19";
-        String end   = "2015-04-19-19";
+//        String start = "2015-04-19-19";
+//        String end   = "2015-04-19-19";
 
-//        String start = args[0];
-//        String end   = args[1];
+        String start = args[0];
+        String end   = args[1];
 
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd-HH");
         DateTime timeStart = fmt.parseDateTime(start);
@@ -213,9 +213,9 @@ public class DBpediaLiveDigest {
                     if (descriptionTemplate.contains("%%" + var + "%%")) {
                         L.debug("    " + var + " " + r.get(var).toString());
                         if (r.get(var).isLiteral())
-                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", r.get(var).asLiteral().getLexicalForm());
+                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", r.get(var).asLiteral().getLexicalForm().replace("$", "\\$"));
                         else if (r.get(var).isURIResource())
-                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", getLabelForResource(r.get(var).asResource().getURI()));
+                            descriptionTemplate = descriptionTemplate.replaceAll("%%" + var + "%%", getLabelForResource(r.get(var).asResource().getURI()).replace("$", "\\$"));
                         else
                             L.warn("Unhandled type " + r.get(var));
                     }
