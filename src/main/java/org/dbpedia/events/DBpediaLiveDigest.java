@@ -9,11 +9,7 @@ import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.sparql.util.Context;
 import com.hp.hpl.jena.sparql.util.Symbol;
 import com.hp.hpl.jena.vocabulary.DCTerms;
-import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryCache;
-import org.aksw.jena_sparql_api.cache.extra.Cache;
-import org.aksw.jena_sparql_api.cache.extra.CacheCore;
-import org.aksw.jena_sparql_api.cache.extra.CacheImpl;
-import org.aksw.jena_sparql_api.cache.h2.CacheCoreH2;
+import org.aksw.jena_sparql_api.cache.h2.CacheUtilsH2;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.http.QueryExecutionFactoryHttp;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
@@ -39,7 +35,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -95,13 +90,10 @@ public class DBpediaLiveDigest {
         queryFactory = new QueryExecutionFactoryHttp(sparqlEndpoint, sparqlDefaultgraph);
         try {
             long timeToLive = 60l * 60l * 1000l;
-            CacheCore core = CacheCoreH2.create(true, "/tmp/", "sparqlEndpoint", timeToLive);
-            Cache cache = new CacheImpl(core);
-            queryFactory = new QueryExecutionFactoryCache(queryFactory, cache);
-        } catch (ClassNotFoundException e) {
-            L.error("Error creating cache: ", e);
-        } catch (SQLException e) {
-            L.error("Error creating cache: ", e);
+            queryFactory = CacheUtilsH2.createQueryExecutionFactory(queryFactory, "./cache/sparql", false, timeToLive);
+            L.debug("Cache for endpoint set up: " + queryFactory.getId());
+        } catch (Exception e) {
+            L.error("Could not instantiate cache for Endpoint" + queryFactory.getId(), e);
         }
 
         pagerankQueryFactory = new QueryExecutionFactoryHttp(sparqlPagerankEndpoint, sparqlPagerankDefaultgraph);
