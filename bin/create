@@ -1,7 +1,10 @@
 #!/bin/bash
 
+PROJECT_DIR="/home/magnus/Development/dbpedia-events/"
 MAIN_CLS="org.dbpedia.events.DBpediaLiveDigest"
 MVN="mvn"
+
+cd ${PROJECT_DIR}
 
 if [ ! -d "target" ]; then
   echo "First run, compiling code..."

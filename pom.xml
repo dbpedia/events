@@ -50,6 +50,11 @@
             <version>${jena-sparql-api-version}</version>
         </dependency>
         <dependency>
+            <groupId>org.aksw.jena-sparql-api</groupId>
+            <artifactId>jena-sparql-api-cache-h2</artifactId>
+            <version>${jena-sparql-api-version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>14.0.1</version>

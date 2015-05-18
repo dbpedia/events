@@ -12,16 +12,23 @@ thisexec=$0
 command="$1"
 os=`uname -s | tr "[:upper:]" "[:lower:]"`
 
-yesterday=`date -v -1d '+%Y-%m-%d'`
-yesterdayDir=`date -v -1d '+%Y/%m/%d'`
+# Mac OSX
+#yesterday=`date -v -1d '+%Y-%m-%d'`
+#yesterdayDir=`date -v -1d '+%Y/%m/%d'`
+# Linux
+yesterday=`date -d "yesterday 13:00 " '+%Y-%m-%d'`
+yesterdayDir=`date -d "yesterday 13:00 " '+%Y/%m/%d'`
 
 # Download the changesets
 echo "Downloading http://live.dbpedia.org/changesets/${yesterdayDir}/"
 wget --random-wait --mirror -np -e robots=off -c -N -P /home/magnus/Datasets/ http://live.dbpedia.org/changesets/${yesterdayDir}/
 
 # Run the extraction from yesterday-00 until yesterday-23
+PROJECT_DIR="/home/magnus/Development/dbpedia-events/"
 MAIN_CLS="org.dbpedia.events.DBpediaLiveDigest"
 MVN="mvn"
+
+cd ${PROJECT_DIR}
 
 if [ ! -d "target" ]; then
   echo "First run, compiling code..."

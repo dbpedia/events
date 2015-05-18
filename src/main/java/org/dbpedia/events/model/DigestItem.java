@@ -155,9 +155,14 @@ public class DigestItem {
             this.digest.L.debug("No modified date.");
         } else while (rs.hasNext()) {
             QuerySolution r = rs.nextSolution();
-            this.digest.L.debug("Unmodified days = " + r.get("days"));
-            Period unmodified = Period.parse(r.get("days").asLiteral().getString());
-            unmodifiedDays = unmodified.getDays();
+            String days = r.get("days").asLiteral().getString();
+            this.digest.L.debug("Unmodified days = " + days);
+            if (!days.startsWith("-")) {
+                Period unmodified = Period.parse(days);
+                unmodifiedDays = unmodified.getDays();
+            } else {
+                unmodifiedDays = 0;
+            }
         }
 
         // get indegree and outdegree

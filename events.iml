@@ -49,6 +49,8 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.2" level="project" />
     <orderEntry type="library" name="Maven: com.blogspot.nurkiewicz.asyncretry:asyncretry:0.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.aksw.jena-sparql-api:jena-sparql-api-resources:2.12.1-6" level="project" />
+    <orderEntry type="library" name="Maven: org.aksw.jena-sparql-api:jena-sparql-api-cache-h2:2.12.1-6" level="project" />
+    <orderEntry type="library" name="Maven: com.h2database:h2:1.4.184" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:14.0.1" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.4" level="project" />
     <orderEntry type="library" name="Maven: commons-configuration:commons-configuration:1.10" level="project" />
