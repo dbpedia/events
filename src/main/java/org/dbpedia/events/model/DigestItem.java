@@ -123,7 +123,7 @@ public class DigestItem {
         event.addProperty(ProvOntology.generatedAtTime, model.createTypedLiteral(this.digest.getEnd(), XSDDatatype.XSDdateTime));
 
         // add derivedFroms
-        event.addProperty(ProvOntology.wasDerivedFrom, PrefixService.getNamespaceForPrefix("dig") + this.getDigestTemplate().getId());
+        event.addProperty(ProvOntology.wasDerivedFrom, model.getResource(PrefixService.getNamespaceForPrefix("dig") + this.getDigestTemplate().getId()));
         for (Resource changesetFile: this.changesetFiles) {
             event.addProperty(ProvOntology.wasDerivedFrom, changesetFile);
         }

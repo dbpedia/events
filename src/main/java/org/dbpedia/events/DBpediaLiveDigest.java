@@ -69,6 +69,14 @@ public class DBpediaLiveDigest {
 
         this.start = start;
         this.end = end;
+
+        try {
+            long timeToLive = 60l * 60l * 1000l;
+            this.queryFactory = CacheUtilsH2.createQueryExecutionFactory(this.queryFactory, "./cache/sparql-" + this.getDigestId().replaceAll("/", "-"), false, timeToLive);
+            L.debug("Cache for endpoint set up: " + this.queryFactory.getId());
+        } catch (Exception e) {
+            L.error("Could not instantiate cache for Endpoint" + this.queryFactory.getId(), e);
+        }
     }
 
     private DBpediaLiveDigest() throws ConfigurationException {
@@ -88,14 +96,6 @@ public class DBpediaLiveDigest {
         datasetTargetfolder = config.getString("dbpediadigest.dataset.targetfolder");
 
         queryFactory = new QueryExecutionFactoryHttp(sparqlEndpoint, sparqlDefaultgraph);
-        try {
-            long timeToLive = 60l * 60l * 1000l;
-            queryFactory = CacheUtilsH2.createQueryExecutionFactory(queryFactory, "./cache/sparql", false, timeToLive);
-            L.debug("Cache for endpoint set up: " + queryFactory.getId());
-        } catch (Exception e) {
-            L.error("Could not instantiate cache for Endpoint" + queryFactory.getId(), e);
-        }
-
         pagerankQueryFactory = new QueryExecutionFactoryHttp(sparqlPagerankEndpoint, sparqlPagerankDefaultgraph);
     }
 
@@ -379,6 +379,8 @@ public class DBpediaLiveDigest {
 */
         } catch (RiotException e) {
             L.error("RiotException when querying <" + uriFrom + ">: " + e.getMessage());
+        } catch (RuntimeException e) {
+            L.error("RuntimeException when querying <" + uriFrom + ">: " + e.getMessage());
         } finally {
             if (qe != null) {
                 qe.close();
@@ -634,12 +636,15 @@ public class DBpediaLiveDigest {
     }
 
     private void processFile(Multimap<Resource, Statement> insert, Multimap<Resource, Statement> delete, Multimap<Resource, Resource> changesets, File f) {
-        Model changesetModel = ModelFactory.createDefaultModel();
-        changesetModel.read(f.getAbsolutePath());
+        L.debug("Reading.");
+        Model changesetModel = RDFDataMgr.loadModel(f.getAbsolutePath());
+        L.debug("Reading done.");
         StmtIterator iter = changesetModel.listStatements();
+        L.debug("Statement iterator done.");
 
         Resource changesetFile = changesetModel.createResource(
                 changesetsBaseUrl + f.getAbsolutePath().split("/changesets/")[1]);
+        L.debug("Changeset file url: " + changesetFile.getURI());
 
         if (f.getName().endsWith(".added.nt.gz")) {
             L.debug("READ FILE " + f.getAbsolutePath());
@@ -674,7 +679,6 @@ public class DBpediaLiveDigest {
             } finally {
                 if (iter != null) iter.close();
             }
-
         } else if (f.getName().endsWith(".removed.nt.gz")) {
             L.debug("READ FILE " + f.getAbsolutePath());
 
@@ -704,6 +708,8 @@ public class DBpediaLiveDigest {
         } else {
             L.debug("IGNORE FILE " + f.getAbsolutePath());
         }
+
+        changesetModel.close();
     }
 
     /**
