@@ -25,6 +25,8 @@ wget --random-wait --mirror -np -e robots=off -c -N -P /home/magnus/Datasets/ ht
 
 # Run the extraction from yesterday-00 until yesterday-23
 PROJECT_DIR="/home/magnus/Development/dbpedia-events/"
+DATASET_DIR="/var/www/html/events/dataset/"
+VIRTUOSO_DUMP_DIR="/home/virtuoso/events/dumps/"
 MAIN_CLS="org.dbpedia.events.DBpediaLiveDigest"
 MVN="mvn"
 
@@ -41,3 +43,6 @@ fi
 
 echo "Running ${MAIN_CLS} ${yesterday}-00 ${yesterday}-23"
 ${MVN} exec:java -q -Dexec.mainClass="$MAIN_CLS" -Dexec.args="${yesterday}-00 ${yesterday}-23"
+
+echo "Copy ${DATASET_DIR}${yesterdayDir}.ttl to ${VIRTUOSO_DUMP_DIR}${yesterdayDir}.ttl"
+cp ${DATASET_DIR}${yesterdayDir}.ttl ${VIRTUOSO_DUMP_DIR}${yesterdayDir}.ttl
