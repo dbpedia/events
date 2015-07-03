@@ -232,7 +232,7 @@ public class DBpediaLiveDigest {
                 //uModel.write(System.out, "TURTLE");
                 digestItem.setUpdateInstruction(u.replace("http://live.dbpedia.org/changesets/", ":update/"), uModel);
 
-                String snapshotUri = datasetBase + "snaphot/" + getDigestId() + res.replace("http://dbpedia.org/resource/", "/");
+                String snapshotUri = datasetBase + "snapshot/" + getDigestId() + res.replace("http://dbpedia.org/resource/", "/");
                 digestItem.addSnapshot(snapshotUri, getModelForResource(queryFactory, res, snapshotUri));
 
                 digestItems.add(digestItem);

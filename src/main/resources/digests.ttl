@@ -23,6 +23,7 @@ dig:DEADPEOPLEWOF a dbe:DigestTemplate ;
     .
 
 dig:DEADPEOPLE a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "DEADPEOPLE" ;
     dcterms:description """Finds people who died within last three weeks."""@en ;
     dbe:queryString """SELECT ?u ?res ?deathdate ?deathplace
@@ -39,6 +40,7 @@ dig:DEADPEOPLE a dbe:DigestTemplate ;
     .
 
 dig:RELEASED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "RELEASED" ;
     dcterms:description """Finds works released within last three weeks."""@en ;
     dbe:queryString """SELECT ?u ?res ?releasedate
@@ -53,6 +55,7 @@ dig:RELEASED a dbe:DigestTemplate ;
     .
 
 dig:INTRODUCED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "INTRODUCED" ;
     dcterms:description """Finds things introduced within last three weeks."""@en ;
     dbe:queryString """SELECT ?u ?res ?introductiondate
@@ -89,6 +92,7 @@ dig:RISINGNUMBERS a dbe:DigestTemplate ;
     .
 
 dig:HEADHUNTED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "HEADHUNTED" ;
     dcterms:description """Team changed."""@en ;
     dbe:queryString """SELECT ?u ?res ?oldTeam ?newTeam
@@ -100,12 +104,15 @@ dig:HEADHUNTED a dbe:DigestTemplate ;
     dbe:contextQueryString """SELECT ?labelres ?labeloldTeam ?labelnewTeam
         { %%res%% rdfs:label ?labelres .
           %%oldTeam%% rdfs:label ?labeloldTeam .
-          %%newTeam%% rdfs:label ?labelnewTeam . }""" ;
+          %%newTeam%% rdfs:label ?labelnewTeam .
+          FILTER NOT EXISTS {?oldTeam <http://dbpedia.org/ontology/wikiPageRedirects> ?newTeam . }
+          FILTER NOT EXISTS {?newTeam <http://dbpedia.org/ontology/wikiPageRedirects> ?oldTeam . } }""" ;
     dbe:descriptionTemplate """%%labelres%% switches from %%oldTeam%% to %%newTeam%%.""" ;
     dbe:rankWeight "0.2"^^xsd:float ;
     .
 
 dig:PRESIDENT a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "PRESIDENT" ;
     dcterms:description """President changed."""@en ;
     dbe:queryString """SELECT ?u ?res ?oldPres ?newPres
@@ -124,6 +131,7 @@ dig:PRESIDENT a dbe:DigestTemplate ;
     .
 
 dig:LEADER a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "LEADER" ;
     dcterms:description """Leader changed."""@en ;
     dbe:queryString """SELECT ?u ?res ?oldLeader ?newLeader
@@ -141,6 +149,7 @@ dig:LEADER a dbe:DigestTemplate ;
     .
 
 dig:EUROPE2015 a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "EUROPE2015" ;
     dcterms:description """Highlighted events of the year in Europe."""@en ;
     dbe:queryString """SELECT ?u ?res
@@ -156,6 +165,7 @@ dig:EUROPE2015 a dbe:DigestTemplate ;
     .
 
 dig:GRANDPRIX a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "GRANDPRIX" ;
     dcterms:description """Grand Prix race reports."""@en ;
     dbe:queryString """SELECT ?u ?res ?firstD ?firstT ?secondD ?secondT ?thirdD ?thirdT
@@ -180,6 +190,7 @@ dig:GRANDPRIX a dbe:DigestTemplate ;
     .
 
 dig:PODIUM a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "PODIUM" ;
     dcterms:description """Gold, silver, bronze medalists."""@en ;
     dbe:queryString """SELECT ?u ?res ?gold ?silver ?bronze
@@ -198,6 +209,7 @@ dig:PODIUM a dbe:DigestTemplate ;
     .
 
 dig:JUSTMARRIED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "JUSTMARRIED" ;
     dcterms:description """New spouse."""@en ;
     dbe:queryString """SELECT ?u ?res ?spouse
@@ -215,6 +227,7 @@ dig:JUSTMARRIED a dbe:DigestTemplate ;
     .
 
 dig:JUSTDIVORCED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "JUSTDIVORCED" ;
     dcterms:description """Left spouse."""@en ;
     dbe:queryString """SELECT ?u ?res ?spouse
@@ -263,6 +276,7 @@ dig:VOLCANO a dbe:DigestTemplate ;
     .
 
 dig:AWARDED a dbe:DigestTemplate ;
+    dbe:ignore true ;
     dcterms:identifier "AWARDED" ;
     dcterms:description """Award receptions."""@en ;
     dbe:queryString """SELECT ?u ?res ?award
@@ -274,4 +288,54 @@ dig:AWARDED a dbe:DigestTemplate ;
           %%award%% rdfs:label ?labelaward . }""" ;
     dbe:descriptionTemplate """%%labelres%% awarded with the %%award%%.""" ;
     dbe:rankWeight "0.4"^^xsd:float ;
+    .
+
+dig:GEO a dbe:DigestTemplate ;
+    dbe:ignore true ;
+    dcterms:identifier "GEO" ;
+    dcterms:description """Geo related."""@en ;
+    dbe:queryString """SELECT ?u ?res ?p ?old ?new
+        { ?u guo:target_subject ?res ;
+            guo:delete [
+                ?p ?old ] ;
+            guo:insert [
+                ?p ?new ] .
+            FILTER (STRSTARTS(STR(?p), "http://dbpedia.org/ontology/"))
+            FILTER (?p != dbo:wikiPageID)
+            FILTER (?p != dbo:wikiPageLength)
+            FILTER (?p != dbo:wikiPageOutDegree)
+            FILTER (?p != dbo:wikiPageRevisionID)
+            FILTER (?p != dbo:wikiPageEditLink)
+            FILTER (?p != dbo:wikiPageExtracted)
+            FILTER (?p != dbo:wikiPageModified)
+            FILTER (?p != dbo:wikiPageHistoryLink)
+            FILTER (?p != dbo:wikiPageRevisionLink)
+            }""" ;
+    dbe:contextQueryString """SELECT ?labelres
+        { %%res%% rdfs:label ?labelres ;
+            geo:lat ?lat ;
+            geo:long ?long .
+        }""" ;
+    dbe:descriptionTemplate """%%labelres%%'s %%p%% changed from %%old%% to %%new%%.""" ;
+    dbe:rankWeight "0.1"^^xsd:float ;
+    .
+
+dig:GEOMOVE a dbe:DigestTemplate ;
+    dcterms:identifier "GEOMOVE" ;
+    dcterms:description """LatLong coordinates changed."""@en ;
+    dbe:queryString """SELECT ?u ?res ?oldLat ?oldLong ?newLat ?newLong
+        { ?u guo:target_subject ?res ;
+            guo:delete [
+                geo:lat ?oldLat ;
+                geo:long ?oldLong ] ;
+            guo:insert [
+                geo:lat ?newLat ;
+                geo:long ?newLong ] .
+            FILTER ((?oldLat-?newLat) >= 0.1 || (?oldLat-?newLat) <= -0.1 || (?oldLong-?newLong) >= 0.1 || (?oldLong-?newLong) <= -0.1)
+            }""" ;
+    dbe:contextQueryString """SELECT ?labelres
+        { %%res%% rdfs:label ?labelres .
+        }""" ;
+    dbe:descriptionTemplate """%%labelres%%'s position moved from %%oldLat%%,%%oldLong%% to %%newLat%%,%%newLong%%.""" ;
+    dbe:rankWeight "0.1"^^xsd:float ;
     .

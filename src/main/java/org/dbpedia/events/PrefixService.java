@@ -33,6 +33,7 @@ public class PrefixService {
         prefixes.put("sd", "http://www.w3.org/ns/sparql-service-description#");
         prefixes.put("void", "http://rdfs.org/ns/void#");
         prefixes.put("xsd", "http://www.w3.org/2001/XMLSchema#");
+        prefixes.put("geo", "http://www.w3.org/2003/01/geo/wgs84_pos#");
     }
 
     public static String getAllPrefixes() {
