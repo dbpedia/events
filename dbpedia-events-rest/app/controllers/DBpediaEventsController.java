@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.limit.QueryExecutionFactoryLimit;
 import org.aksw.jena_sparql_api.model.QueryExecutionFactoryModel;
@@ -121,7 +122,12 @@ public class DBpediaEventsController extends Controller {
             }
 
             if (queryText != null) {
-                QueryExecutionFactory queryQueryExecutionFactory = new QueryExecutionFactoryModel(RDFDataMgr.loadModel(digestFile.getAbsolutePath()));
+                Model model = RDFDataMgr.loadModel(digestFile.getAbsolutePath());
+                Model tModel = ModelFactory.createDefaultModel();
+                tModel.read(new ByteArrayInputStream(templateText.getBytes()), null, "TTL");
+                model.add(tModel);
+
+                QueryExecutionFactory queryQueryExecutionFactory = new QueryExecutionFactoryModel(model);
                 Query query = QueryFactory.create(queryText);
                 QueryExecution queryQueryExecution = queryQueryExecutionFactory.createQueryExecution(query);
                 ResultSet rs = queryQueryExecution.execSelect();
