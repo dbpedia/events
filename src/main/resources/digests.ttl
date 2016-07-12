@@ -1,5 +1,6 @@
 @prefix dig:        <http://events.dbpedia.org/data/digests#> .
 @prefix dbe:        <http://events.dbpedia.org/ns/core#> .
+@prefix guo:        <http://purl.org/hpi/guo#> .
 @prefix dcterms:    <http://purl.org/dc/terms/> .
 @prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix dc:         <http://purl.org/dc/elements/1.1/> .
