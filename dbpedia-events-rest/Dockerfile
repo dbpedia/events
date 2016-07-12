@@ -50,7 +50,8 @@ RUN echo "export _JAVA_OPTIONS='-Duser.home=/home/play/Code'" >> /home/play/.bas
 # Change user, launch bash
 USER play
 WORKDIR /home/play
-CMD ["/bin/bash"]
+#CMD ["/bin/bash"]
+CMD ["./activator run"]
 
 # Expose Code volume and play ports 9000 default 9999 debug 8888 activator ui
 VOLUME "/home/play/Code"
